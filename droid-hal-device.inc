@@ -510,7 +510,7 @@ mkdir -p $RPM_BUILD_ROOT%{_libexecdir}/droid-hybris/lib-dev-alog/
 mkdir -p $RPM_BUILD_ROOT%{_libexecdir}/droid-hybris/lib64-dev-alog/
 %endif
 mkdir -p $RPM_BUILD_ROOT%{_libexecdir}/droid-hybris/system
-mkdir -p $RPM_BUILD_ROOT%{dhdlibdir}/droid-devel/
+mkdir -p $RPM_BUILD_ROOT%{_includedir}/droid-devel/
 mkdir -p $RPM_BUILD_ROOT%{_unitdir}
 mkdir -p $RPM_BUILD_ROOT/lib/udev/rules.d
 mkdir -p $RPM_BUILD_ROOT/etc/udev/rules.d
@@ -565,8 +565,8 @@ cp -a %{android_root}/out/target/product/%{device}/system/lib64 $RPM_BUILD_ROOT%
 %endif
 # Remove kernel modules if installed under /system/lib/modules
 rm -rf $RPM_BUILD_ROOT%{_libexecdir}/droid-hybris/system/lib/modules
-cp -a %{android_root}/out/target/product/%{device}/obj/include $RPM_BUILD_ROOT%{dhdlibdir}/droid-devel/
-rm -rf $RPM_BUILD_ROOT%{dhdlibdir}/droid-devel/lib/*.so.toc
+cp -a %{android_root}/out/target/product/%{device}/obj/include $RPM_BUILD_ROOT%{_includedir}/droid-devel/
+rm -rf $RPM_BUILD_ROOT%{_includedir}/droid-devel/lib/*.so.toc
 
 # Omit audioflingerglue bits, they get packaged via audioflingerglue-localbuild
 rm -f $RPM_BUILD_ROOT%{_libexecdir}/droid-hybris/system/{lib,lib64}/libaudioflingerglue.so
@@ -577,20 +577,20 @@ rm -f $RPM_BUILD_ROOT%{_libexecdir}/droid-hybris/system/{lib,lib64}/libminisf.so
 rm -f $RPM_BUILD_ROOT%{_libexecdir}/droid-hybris/system/bin/minimediaservice
 rm -f $RPM_BUILD_ROOT%{_libexecdir}/droid-hybris/system/bin/minisfservice
 
-HDRS=$RPM_BUILD_ROOT%{dhdlibdir}/droid-devel/droid-headers
+HDRS=$RPM_BUILD_ROOT%{_includedir}/droid-devel/droid-headers
 mkdir -p $HDRS
 
 # Run extract-headers.sh
 %if 0%{!?provides_own_headers:1}
 echo "Extracting headers for hybris"
 # This is copied from libhybris and should be kept in-sync:
-%{dhd_path}/helpers/extract-headers.sh -p %{dhdlibdir}/droid-devel/droid-headers . $HDRS/ > /dev/null
+%{dhd_path}/helpers/extract-headers.sh -p %{_includedir}/droid-devel/droid-headers . $HDRS/ > /dev/null
 if test -d "%{android_root}/rpm/header_patches"; then
     %{dhd_path}/helpers/patch-headers.sh "$HDRS" "%{android_root}/rpm/header_patches"/*.patch
 fi
 %else
 pushd %{android_root}/rpm/droid-headers 1>/dev/null
-make install DESTDIR=$RPM_BUILD_ROOT PREFIX=%{_prefix} INCLUDEDIR=%{dhdlibdir}/droid-devel/droid-headers
+make install DESTDIR=$RPM_BUILD_ROOT PREFIX=%{_prefix} INCLUDEDIR=%{_includedir}/droid-devel/droid-headers
 popd 1>/dev/null
 %endif
 
@@ -713,7 +713,7 @@ done
 #mv $RPM_BUILD_ROOT/charger $RPM_BUILD_ROOT/sbin/droid-hal-charger
 
 # for use in the -devel package
-cp tmp/hw-release %{buildroot}/%{dhdlibdir}/droid-devel/hw-release.vars
+cp tmp/hw-release %{buildroot}/%{_includedir}/droid-devel/hw-release.vars
 
 # Store the groups that users need to be in to access various subsystems this HA provides
 # These are the default android ones:
@@ -933,7 +933,7 @@ done
 
 %files devel
 %defattr(644,root,root,-)
-%{dhdlibdir}/droid-devel/
+%{_includedir}/droid-devel/
 %if 0%{?_obs_build_project:1}
 # this hack fixes OBS i586 worker failure
 %{_prefix}/lib*/pkgconfig/*pc
